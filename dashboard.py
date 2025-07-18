@@ -15,11 +15,18 @@ st.title(':pager: One-Click Data Visualizer', )
 st.markdown('<style>div.block-container{padding-top:2rem;}</style>',unsafe_allow_html=True)
 
 #=== 0. Setting up Session state
+
 if 'df' not in st.session_state:
-    os.chdir(r"E:\Streamlit projects\Store_sales")
-    st.session_state.df = pd.read_csv('superstore.csv')
-    st.session_state.original_df = st.session_state.df.copy()
-    st.session_state.source = 'default'  # Just a label
+    default_csv = "superstore.csv"
+    if os.path.exists(default_csv):
+        st.session_state.df = pd.read_csv(default_csv)
+        st.session_state.original_df = st.session_state.df.copy()
+        st.session_state.source = 'default'
+    else:
+        st.session_state.df = pd.DataFrame()  # Empty DF if no CSV
+        st.session_state.original_df = st.session_state.df.copy()
+        st.session_state.source = 'none'
+
 
 #=== 1. File upload --- override session_state.df if user uploads ===#
 f1 = st.file_uploader(":file_folder: Upload a file (.csv, .xlsx, .xls, .txt)", type=(['csv','xlsx','xls','txt']))
@@ -39,9 +46,14 @@ if f1 is not None:
         st.session_state.source = 'uploaded'
     else:
         st.error("Unsupported file type, loading default data")
-        os.chdir(r"E:\Streamlit projects\Store_sales")
-        st.session_state.df = pd.read_csv('superstore.csv')
-        st.session_state.source = 'default' 
+        default_csv = "superstore.csv"
+        if os.path.exists(default_csv):
+            st.session_state.df = pd.read_csv(default_csv)
+            st.session_state.source = 'default'
+        else:
+            st.session_state.df = pd.DataFrame()
+            st.session_state.source = 'none'
+
 
 ## Replacing the table
 if f1 is not None and st.session_state.source == 'uploaded':
